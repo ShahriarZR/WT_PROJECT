@@ -11,8 +11,8 @@ $result1 = $db1->findUser($table,$mail,$password,$con);
 if($result1->num_rows>0)
 {
     header("Location:../view/seller_homepage.php");
-    /*echo "Successfully Logged In.<br>";
-    echo '<a href="../view/homepage.php">HOMPAGE</a>';*/
+    
+
 }
 else
 {
