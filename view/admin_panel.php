@@ -3,6 +3,7 @@
 
 <head>
     <title>Admin Panel</title>
+    <script src="../js/myjs.js"></script>
 </head>
 
 <body>
@@ -19,6 +20,19 @@
         </table>
         <input type="submit" value="Submit">
     </form>
+    <ul style="list-style-type:none;">
+        <li><button onclick="dashboard()">Dashboard</button>
+            <ul id="adminDashboard" style="list-style-type:none; display:none;">
+                <li><button onclick="manageAdmin()">Manage Admin</button></li>
+                <li><button onclick="manageUser()">Manage User</button></li>
+                <li><button onclick="manageEmployee()">Manage Employee</button></li>
+                <li><button onclick="manageSeller()">Manage Seller</button></li>
+            </ul>
+        </li>
+        <li>Products</li>
+        <li>Packages</li>
+    </ul>
+    <div id="output"></div>
 
     <?php
     if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["action"])) {
@@ -32,14 +46,14 @@
 
             if ($result && $result->num_rows > 0) {
                 while ($row = $result->fetch_assoc()) {
-                    echo "Serial: " . $row["admin_id"]." "."Name: " . $row["name"]." "."Email: " . $row["email"]." "."Phone: " . $row["phone"]." "."Gender: " . $row["gender"]." "."Address: " . $row["address"];
+                    echo "Serial: " . $row["admin_id"] . " " . "Name: " . $row["name"] . " " . "Email: " . $row["email"] . " " . "Phone: " . $row["phone"] . " " . "Gender: " . $row["gender"] . " " . "Address: " . $row["address"] . "<br>";
                 }
             } else {
                 echo "no result";
             }
 
             $conn->close();
-        } elseif($action === "viewby") {
+        } elseif ($action === "viewby") {
             $db = new myDB();
             $conn = $db->openCon();
             $result = $db->viewbylike($conn);
@@ -53,8 +67,7 @@
             }
 
             $conn->close();
-        }
-        elseif($action === "and") {
+        } elseif ($action === "and") {
             $db = new myDB();
             $conn = $db->openCon();
             $result = $db->viewbyidname($conn);
@@ -68,8 +81,7 @@
             }
 
             $conn->close();
-        }
-        else{
+        } else {
             echo "Please select one action";
         }
     }
