@@ -35,6 +35,12 @@ class mydb{
         return $connobject->query($sql);
     }
 
+    function findPackage($table,$connobject)
+    {
+        $sql="SELECT tour_package_name,tour_package_description,tour_package_status,tour_package_price,image FROM $table";
+        return $connobject->query($sql);
+    }
+
  
 }
 

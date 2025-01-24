@@ -18,6 +18,5 @@ else
 {
     echo "INVALID EMAIL or PASSWORD.<br>";
     echo '<a href="../view/customer_login.php">RETRY LOGIN</a>';
-}
-    
+}   
 ?>
