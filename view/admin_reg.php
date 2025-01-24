@@ -12,15 +12,17 @@
         <legend>
             <h3>New Admin</h3>
         </legend>
-        <form action="../control/admin_reg_control.php" method="post" onsubmit="return validateForm()">
+        <form onsubmit="return validateForm()" action="../control/admin_reg_control.php" method="post" >
             <table>
                 <tr>
                     <td>Full Name:</td>
                     <td><input type="text" name="name" id="name"></td>
+                    <td><p id="invalidName"><?php echo ""; ?></p></td>
                 </tr>
                 <tr>
                     <td>Email:</td>
                     <td><input type="email" name="email" id="email"></td>
+                    <td><p id="invalidEmail"><?php echo ""; ?></p></td> 
                 </tr>
                 <tr>
                     <td>Phone Number:</td>
