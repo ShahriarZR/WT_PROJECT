@@ -12,28 +12,28 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             die("Connection failed: " . $conn->connect_error);
         }
 
-        foreach ($data as $admin) {
-            $admin_id = $conn->real_escape_string($admin['admin_id']);
-            $name = $conn->real_escape_string($admin['name']);
-            $email = $conn->real_escape_string($admin['email']);
-            $password = $conn->real_escape_string($admin['password']);
-            $phone = $conn->real_escape_string($admin['phone']);
-            $gender = $conn->real_escape_string($admin['gender']);
-            $address = $conn->real_escape_string($admin['address']);
+        foreach ($data as $customer) {
+            $customer_id = $conn->real_escape_string($customer['customer_id']);
+            $name = $conn->real_escape_string($customer['name']);
+            $email = $conn->real_escape_string($customer['email']);
+            $password = $conn->real_escape_string($customer['password']);
+            $phone = $conn->real_escape_string($customer['phone']);
+            $gender = $conn->real_escape_string($customer['gender']);
+            $address = $conn->real_escape_string($customer['address']);
 
-            $sql = "UPDATE admin SET 
+            $sql = "UPDATE customer SET 
                         name = '$name', 
                         email = '$email',
                         phone = '$phone', 
                         password = '$password',
                         gender = '$gender', 
                         address = '$address' 
-                    WHERE admin_id = '$admin_id'";
+                    WHERE customer_id = '$customer_id'";
 
             if ($conn->query($sql) === TRUE) {
-                echo "Admin ID $admin_id updated successfully.";
+                echo "Customer ID $customer_id updated successfully.";
             } else {
-                echo "Error updating admin ID $admin_id: " . $conn->error;
+                echo "Error updating admin ID $customer_id: " . $conn->error;
             }
         }
 

@@ -12,9 +12,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
     if (!empty($email)) {
         $email = $conn->real_escape_string($email);
-        $sql = "SELECT * FROM admin WHERE email = '$email'";
+        $sql = "SELECT * FROM seller WHERE email = '$email'";
     } else {
-        $sql = "SELECT * FROM admin";
+        $sql = "SELECT * FROM seller";
     }
 
     $result = $conn->query($sql);

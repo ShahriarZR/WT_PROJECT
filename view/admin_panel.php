@@ -8,23 +8,11 @@
 
 <body>
     <h1>Admin</h1>
-    <form method="POST">
-        <table>
-            <tr>
-                <td>Choose Action: </td>
-                <td><input type="radio" name="action" value="viewall">View All
-                    <input type="radio" name="action" value="viewby">View By
-                    <input type="radio" name="action" value="and">And
-                </td>
-            </tr>
-        </table>
-        <input type="submit" value="Submit">
-    </form>
     <ul style="list-style-type:none;">
         <li><button onclick="dashboard()">Dashboard</button>
             <ul id="adminDashboard" style="list-style-type:none; display:none;">
                 <li><button onclick="manageAdmin()">Manage Admin</button></li>
-                <li><button onclick="manageUser()">Manage User</button></li>
+                <li><button onclick="manageCustomer()">Manage Customer</button></li>
                 <li><button onclick="manageEmployee()">Manage Employee</button></li>
                 <li><button onclick="manageSeller()">Manage Seller</button></li>
             </ul>
@@ -32,61 +20,23 @@
         <li>Products</li>
         <li>Packages</li>
     </ul>
+    <div id="adminSearch" style="display:none;">
+        <input type="text" id="searchEmail" placeholder="Enter email to search" />
+        <button onclick="searchAdminEmail()">Search</button>
+    </div>
+    <div id="customerSearch" style="display:none;">
+        <input type="text" id="searchCustomerEmail" placeholder="Enter email to search" />
+        <button onclick="searchUserByEmail()">Search</button>
+    </div>
+    <div id="employeeSearch" style="display:none;">
+        <input type="text" id="searchEmployeeEmail" placeholder="Enter email to search" />
+        <button onclick="searchUserByEmail()">Search</button>
+    </div>
+    <div id="sellerSearch" style="display:none;">
+        <input type="text" id="searchSellerEmail" placeholder="Enter email to search" />
+        <button onclick="searchUserByEmail()">Search</button>
+    </div>
     <div id="output"></div>
-
-    <?php
-    if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["action"])) {
-        include '../model/mydb.php';
-
-        $action = $_POST["action"];
-        if ($action === "viewall") {
-            $db = new myDB();
-            $conn = $db->openCon();
-            $result = $db->viewall($conn);
-
-            if ($result && $result->num_rows > 0) {
-                while ($row = $result->fetch_assoc()) {
-                    echo "Serial: " . $row["admin_id"] . " " . "Name: " . $row["name"] . " " . "Email: " . $row["email"] . " " . "Phone: " . $row["phone"] . " " . "Gender: " . $row["gender"] . " " . "Address: " . $row["address"] . "<br>";
-                }
-            } else {
-                echo "no result";
-            }
-
-            $conn->close();
-        } elseif ($action === "viewby") {
-            $db = new myDB();
-            $conn = $db->openCon();
-            $result = $db->viewbylike($conn);
-
-            if ($result && $result->num_rows > 0) {
-                while ($row = $result->fetch_assoc()) {
-                    echo "Password: " . $row["password"];
-                }
-            } else {
-                echo "no result";
-            }
-
-            $conn->close();
-        } elseif ($action === "and") {
-            $db = new myDB();
-            $conn = $db->openCon();
-            $result = $db->viewbyidname($conn);
-
-            if ($result && $result->num_rows > 0) {
-                while ($row = $result->fetch_assoc()) {
-                    echo "Phone: " . $row["phone"];
-                }
-            } else {
-                echo "no result";
-            }
-
-            $conn->close();
-        } else {
-            echo "Please select one action";
-        }
-    }
-    ?>
-
 </body>
 
 </html>
