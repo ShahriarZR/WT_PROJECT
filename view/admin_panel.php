@@ -17,8 +17,18 @@
                 <li><button onclick="manageSeller()">Manage Seller</button></li>
             </ul>
         </li>
-        <li>Products</li>
-        <li>Packages</li>
+        <li><button onclick="travelAccessories()">Travel Accessories</button>
+            <ul id="travelAccessories" style="list-style-type:none; display:none;">
+                <li><button onclick="viewAllAccessories()">View All Accessories</button></li>
+                <li><button onclick="approveNewAccessories()">Approve New Accessories</button></li>
+            </ul>
+        </li>
+        <li><button onclick="tourPackages()">Packages</button>
+            <ul id="tourPackages" style="list-style-type:none; display:none;">
+                <li><button onclick="viewAllPackages()">View All PAckages</button></li>
+                <li><button onclick="approveNewPackages()">Approve New Packages</button></li>
+            </ul>
+        </li>
     </ul>
     <div id="adminSearch" style="display:none;">
         <input type="text" id="searchEmail" placeholder="Enter email to search" />

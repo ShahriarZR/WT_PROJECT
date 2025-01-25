@@ -348,7 +348,7 @@ function manageEmployee(searchEmail = "") {
     })
         .then(response => response.json())
         .then(data => {
-            if (Array.isArray(data)/*  && data.length > 0 */) {
+            if (Array.isArray(data) && data.length > 0) {
                 var table = "<table border='1' id='employeeTable'><tr><th>Serial</th><th>Name</th><th>Email</th><th>Password</th><th>Phone</th><th>Gender</th><th>Address</th><th>Position</th><th>Actions</th></tr>";
                 data.forEach(function (row) {
                     table += "<tr>" +
@@ -469,7 +469,7 @@ function manageSeller(searchEmail = "") {
     })
         .then(response => response.json())
         .then(data => {
-            if (Array.isArray(data) /* && data.length > 0 */) {
+            if (Array.isArray(data) && data.length > 0) {
                 var table = "<table border='1' id='sellerTable'><tr><th>Serial</th><th>Name</th><th>Email</th><th>Shop Name</th><th>Address</th><th>Password</th><th>Phone</th><th>Actions</th></tr>";
                 data.forEach(function (row) {
                     table += "<tr>" +
@@ -594,4 +594,96 @@ function saveSellerRow(button) {
             document.getElementById("output").innerHTML += "<p>" + data + "</p>";
             manageSeller();
         });
+}
+
+
+//travel accessories management
+function travelAccessories(){
+    const travelAccessories = document.getElementById("travelAccessories");
+    if (travelAccessories.style.display === "none" || travelAccessories.style.display === "") {
+        travelAccessories.style.display = "block";
+    }
+    else {
+        travelAccessories.style.display = "none";
+    }
+}
+function printAccessories(url, outputElement) {
+    fetch(url, {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json"
+        }
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (Array.isArray(data) && data.length > 0) {
+                var table = "<table border='1'><tr><th>ID</th><th>Name</th><th>Description</th><th>Price</th><th>Stock</th><th>Seller ID</th></tr>";
+                data.forEach(accessory => {
+                    table += "<tr>" +
+                        "<td>" + accessory.travel_accessory_id + "</td>" +
+                        "<td>" + accessory.name + "</td>" +
+                        "<td>" + accessory.description + "</td>" +
+                        "<td>" + accessory.price + "</td>" +
+                        "<td>" + accessory.stock + "</td>" +
+                        "<td>" + accessory.seller_id + "</td>" +
+                        "</tr>";
+                });
+                table += "</table>";
+                document.getElementById(outputElement).innerHTML = table;
+            } else {
+                document.getElementById(outputElement).innerHTML = "No data found.";
+            }
+        });
+}
+function viewAllAccessories() {
+    printAccessories("../control/view_all_accessories.php", "output");
+}
+function approveNewAccessories() {
+    printAccessories("../control/approve_new_accessories.php", "output");
+}
+
+
+//travel packages management
+function tourPackages(){
+    const tourPackages = document.getElementById("tourPackages");
+    if (tourPackages.style.display === "none" || tourPackages.style.display === "") {
+        tourPackages.style.display = "block";
+    }
+    else {
+        tourPackages.style.display = "none";
+    }
+}
+function printPackages(url, outputElement) {
+    fetch(url, {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json"
+        }
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (Array.isArray(data) && data.length > 0) {
+                var table = "<table border='1'><tr><th>ID</th><th>Name</th><th>Description</th><th>Price</th><th>Stock</th><th>Seller ID</th></tr>";
+                data.forEach(package => {
+                    table += "<tr>" +
+                        "<td>" + package.tour_package_id + "</td>" +
+                        "<td>" + package.name + "</td>" +
+                        "<td>" + package.description + "</td>" +
+                        "<td>" + package.status + "</td>" +
+                        "<td>" + package.price + "</td>" +
+                        "<td>" + package.employee_id + "</td>" +
+                        "</tr>";
+                });
+                table += "</table>";
+                document.getElementById(outputElement).innerHTML = table;
+            } else {
+                document.getElementById(outputElement).innerHTML = "No data found.";
+            }
+        });
+}
+function viewAllPackages() {
+    printPackages("../control/view_all_package.php", "output");
+}
+function approveNewPackages() {
+    printPackages("../control/approve_new_package.php", "output");
 }
