@@ -47,6 +47,7 @@ function validateForm() {
     }
 }
 
+//admin management
 function dashboard() {
     const adminDashboard = document.getElementById("adminDashboard");
     if (adminDashboard.style.display === "none" || adminDashboard.style.display === "") {
@@ -58,6 +59,9 @@ function dashboard() {
 }
 function manageAdmin(searchEmail = "") {
     document.getElementById("adminSearch").style.display = "block";
+    document.getElementById("customerSearch").style.display = "none";
+    document.getElementById("employeeSearch").style.display = "none";
+    document.getElementById("sellerSearch").style.display = "none";
     fetch("../control/manage_admin_control.php", {
         method: "POST",
         headers: {
@@ -76,7 +80,13 @@ function manageAdmin(searchEmail = "") {
                         "<td contenteditable='false'>" + row.email + "</td>" +
                         "<td contenteditable='false'>" + row.password + "</td>" +
                         "<td contenteditable='false'>" + row.phone + "</td>" +
-                        "<td contenteditable='false'>" + row.gender + "</td>" +
+                        "<td contenteditable='false'>" +
+                        "<select disabled>" +
+                        "<option value='Male'" + (row.gender === "Male" ? " selected" : "") + ">Male</option>" +
+                        "<option value='Female'" + (row.gender === "Female" ? " selected" : "") + ">Female</option>" +
+                        "<option value='Other'" + (row.gender === "Other" ? " selected" : "") + ">Other</option>" +
+                        "</select>" +
+                        "</td>" +
                         "<td contenteditable='false'>" + row.address + "</td>" +
                         "<td><button onclick='AdminEditRow(this)'>Edit</button><button onclick='deleteAdminRow(this)'>Delete</button></td>" +
                         "</tr>";
@@ -88,7 +98,6 @@ function manageAdmin(searchEmail = "") {
             }
         });
 }
-
 function searchAdminEmail() {
     var searchEmail = document.getElementById("searchEmail").value.trim();
     manageAdmin(searchEmail);
@@ -99,12 +108,25 @@ function AdminEditRow(button) {
     var isEditable = cells[1].contentEditable === "true";
 
     for (var i = 1; i < cells.length - 1; i++) { // Skip Serial and Actions column
-        cells[i].contentEditable = !isEditable;
+        if (i === 5) {
+            // Toggle dropdown enable/disable for gender column
+            var select = cells[i].querySelector("select");
+            if (select) {
+                select.disabled = isEditable;
+            }
+        } else {
+            cells[i].contentEditable = !isEditable;
+        }
     }
 
     if (isEditable) {
         button.textContent = "Edit";
-        updateAdminRowData(row);
+        if (validateAdminRowData(row)) {
+            updateAdminRowData(row);
+        } else {
+            document.getElementById("errorMessage").innerHTML = "Enter Valid Data";
+            manageAdmin();
+        }
     } else {
         button.textContent = "Update";
     }
@@ -117,7 +139,7 @@ function updateAdminRowData(row) {
         email: cells[2].textContent,
         password: cells[3].textContent,
         phone: cells[4].textContent,
-        gender: cells[5].textContent,
+        gender: cells[5].querySelector("select").value,
         address: cells[6].textContent
     };
 
@@ -168,37 +190,77 @@ function addAdminRow() {
 }
 function saveAdminRow(button) {
     var row = button.parentElement.parentElement;
-    var cells = row.getElementsByTagName("td");
+    if (validateAdminRowData(row)) {
+        var cells = row.getElementsByTagName("td");
 
-    var rowData = {
-        name: cells[1].textContent,
-        email: cells[2].textContent,
-        password: cells[3].textContent,
-        phone: cells[4].textContent,
-        gender: cells[5].textContent,
-        address: cells[6].textContent
-    };
+        var rowData = {
+            name: cells[1].textContent,
+            email: cells[2].textContent,
+            password: cells[3].textContent,
+            phone: cells[4].textContent,
+            gender: cells[5].querySelector("select").value,
+            address: cells[6].textContent
+        };
 
-    fetch("../control/add_admin.php", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify(rowData)
-    })
-        .then(function (response) {
-            return response.text();
+        fetch("../control/add_admin.php", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(rowData)
         })
-        .then(function (data) {
-            document.getElementById("output").innerHTML += "<p>" + data + "</p>";
-            manageAdmin();
-        });
+            .then(function (response) {
+                return response.text();
+            })
+            .then(function (data) {
+                document.getElementById("output").innerHTML += "<p>" + data + "</p>";
+            });
+    }
+    else {
+        document.getElementById("errorMessage").innerHTML = "Enter Valid Data";
+        manageAdmin();
+    }
+
+}
+function validateAdminRowData(row) {
+    var cells = row.getElementsByTagName("td");
+    var name = cells[1].textContent.trim();
+    var email = cells[2].textContent.trim();
+    var password = cells[3].textContent.trim();
+    var phone = cells[4].textContent.trim();
+    var gender = cells[5].querySelector("select").value;
+    var address = cells[6].textContent.trim();
+    const regexname = /^[A-Za-z\s]+$/;
+    const regexemail = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    const phoneRegex = /^01[0-9]{9}$/;
+    const passwordRegex = /[!@#$%^&*()_\-+=\[\]{};':"\\|,.<>\/?]/;
+
+    // Validation rules
+    if (name === "" ||
+        email === "" ||
+        password === "" ||
+        phone === "" ||
+        gender === "" ||
+        address === "" ||
+        !regexname.test(name) ||
+        !regexemail.test(email) ||
+        !passwordRegex.test(password) ||
+        !phoneRegex.test(phone)
+        || (gender !== "Male" && gender !== "Female" && gender !== "Other")
+
+    ) {
+        return false; // Invalid data
+    }
+    return true; // Valid data
 }
 
 
-//user management
+//customer management
 function manageCustomer(searchEmail = "") {
     document.getElementById("customerSearch").style.display = "block";
+    document.getElementById("adminSearch").style.display = "none";
+    document.getElementById("employeeSearch").style.display = "none";
+    document.getElementById("sellerSearch").style.display = "none";
     fetch("../control/manage_customer_control.php", {
         method: "POST",
         headers: {
@@ -217,7 +279,13 @@ function manageCustomer(searchEmail = "") {
                         "<td contenteditable='false'>" + row.email + "</td>" +
                         "<td contenteditable='false'>" + row.password + "</td>" +
                         "<td contenteditable='false'>" + row.phone + "</td>" +
-                        "<td contenteditable='false'>" + row.gender + "</td>" +
+                        "<td contenteditable='false'>" +
+                        "<select disabled>" +
+                        "<option value='Male'" + (row.gender === "Male" ? " selected" : "") + ">Male</option>" +
+                        "<option value='Female'" + (row.gender === "Female" ? " selected" : "") + ">Female</option>" +
+                        "<option value='Other'" + (row.gender === "Other" ? " selected" : "") + ">Other</option>" +
+                        "</select>" +
+                        "</td>" +
                         "<td contenteditable='false'>" + row.address + "</td>" +
                         "<td><button onclick='editCustomerRow(this)'>Edit</button><button onclick='deleteCustomerRow(this)'>Delete</button></td>" +
                         "</tr>";
@@ -239,12 +307,25 @@ function editCustomerRow(button) {
     var isEditable = cells[1].contentEditable === "true";
 
     for (var i = 1; i < cells.length - 1; i++) { // Skip Serial and Actions column
-        cells[i].contentEditable = !isEditable;
+        if (i === 5) {
+            // Toggle dropdown enable/disable for gender column
+            var select = cells[i].querySelector("select");
+            if (select) {
+                select.disabled = isEditable;
+            }
+        } else {
+            cells[i].contentEditable = !isEditable;
+        }
     }
 
     if (isEditable) {
         button.textContent = "Edit";
-        updateCustomerRow(row);
+        if (validateCustomerRowData(row)) {
+            updateCustomerRow(row);
+        } else {
+            document.getElementById("errorMessage").innerHTML = "Enter Valid Data";
+            manageCustomer();
+        }
     } else {
         button.textContent = "Update";
     }
@@ -257,7 +338,7 @@ function updateCustomerRow(row) {
         email: cells[2].textContent,
         password: cells[3].textContent,
         phone: cells[4].textContent,
-        gender: cells[5].textContent,
+        gender: cells[5].querySelector("select").value,
         address: cells[6].textContent
     };
 
@@ -308,37 +389,78 @@ function addCustomerRow() {
 }
 function saveCustomerRow(button) {
     var row = button.parentElement.parentElement;
-    var cells = row.getElementsByTagName("td");
+    if (validateCustomerRowData(row)) {
+        var cells = row.getElementsByTagName("td");
 
-    var rowData = {
-        name: cells[1].textContent,
-        email: cells[2].textContent,
-        password: cells[3].textContent,
-        phone: cells[4].textContent,
-        gender: cells[5].textContent,
-        address: cells[6].textContent
-    };
+        var rowData = {
+            name: cells[1].textContent,
+            email: cells[2].textContent,
+            password: cells[3].textContent,
+            phone: cells[4].textContent,
+            gender: cells[5].querySelector("select").value,
+            address: cells[6].textContent
+        };
 
-    fetch("../control/add_customer.php", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify(rowData)
-    })
-        .then(function (response) {
-            return response.text();
+        fetch("../control/add_customer.php", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(rowData)
         })
-        .then(function (data) {
-            document.getElementById("output").innerHTML += "<p>" + data + "</p>";
-            manageCustomer();
-        });
+            .then(function (response) {
+                return response.text();
+            })
+            .then(function (data) {
+                document.getElementById("output").innerHTML += "<p>" + data + "</p>";
+                manageCustomer();
+            });
+    }
+    else {
+        document.getElementById("errorMessage").innerHTML = "Enter Valid Data";
+        manageCustomer();
+    }
+
+}
+function validateCustomerRowData(row) {
+    var cells = row.getElementsByTagName("td");
+    var name = cells[1].textContent.trim();
+    var email = cells[2].textContent.trim();
+    var password = cells[3].textContent.trim();
+    var phone = cells[4].textContent.trim();
+    var gender = cells[5].querySelector("select").value;
+    var address = cells[6].textContent.trim();
+    const regexname = /^[A-Za-z\s]+$/;
+    const regexemail = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    const phoneRegex = /^01[0-9]{9}$/;
+    const passwordRegex = /[!@#$%^&*()_\-+=\[\]{};':"\\|,.<>\/?]/;
+
+    // Validation rules
+    if (name === "" ||
+        email === "" ||
+        password === "" ||
+        phone === "" ||
+        gender === "" ||
+        address === "" ||
+        !regexname.test(name) ||
+        !regexemail.test(email) ||
+        !passwordRegex.test(password) ||
+        !phoneRegex.test(phone)
+        || (gender !== "Male" && gender !== "Female" && gender !== "Other")
+
+    ) {
+        return false; // Invalid data
+    }
+    return true; // Valid data
 }
 
 
 //employee management
 function manageEmployee(searchEmail = "") {
     document.getElementById("employeeSearch").style.display = "block";
+    document.getElementById("adminSearch").style.display = "none";
+    document.getElementById("customerSearch").style.display = "none";
+    document.getElementById("sellerSearch").style.display = "none";
     fetch("../control/manage_employee_control.php", {
         method: "POST",
         headers: {
@@ -357,7 +479,13 @@ function manageEmployee(searchEmail = "") {
                         "<td contenteditable='false'>" + row.email + "</td>" +
                         "<td contenteditable='false'>" + row.password + "</td>" +
                         "<td contenteditable='false'>" + row.phone + "</td>" +
-                        "<td contenteditable='false'>" + row.gender + "</td>" +
+                        "<td contenteditable='false'>" +
+                        "<select disabled>" +
+                        "<option value='Male'" + (row.gender === "Male" ? " selected" : "") + ">Male</option>" +
+                        "<option value='Female'" + (row.gender === "Female" ? " selected" : "") + ">Female</option>" +
+                        "<option value='Other'" + (row.gender === "Other" ? " selected" : "") + ">Other</option>" +
+                        "</select>" +
+                        "</td>" +
                         "<td contenteditable='false'>" + row.address + "</td>" +
                         "<td contenteditable='false'>" + row.position + "</td>" +
                         "<td><button onclick='editEmployeeRow(this)'>Edit</button><button onclick='deleteEmployeeRow(this)'>Delete</button></td>" +
@@ -370,18 +498,35 @@ function manageEmployee(searchEmail = "") {
             }
         });
 }
+function searchEmployeeByEmail() {
+    var searchEmail = document.getElementById("searchEmployeeEmail").value.trim();
+    manageCustomer(searchEmail);
+}
 function editEmployeeRow(button) {
     var row = button.parentElement.parentElement;
     var cells = row.getElementsByTagName("td");
     var isEditable = cells[1].contentEditable === "true";
 
     for (var i = 1; i < cells.length - 1; i++) { // Skip Serial and Actions column
-        cells[i].contentEditable = !isEditable;
+        if (i === 5) {
+            // Toggle dropdown enable/disable for gender column
+            var select = cells[i].querySelector("select");
+            if (select) {
+                select.disabled = isEditable;
+            }
+        } else {
+            cells[i].contentEditable = !isEditable;
+        }
     }
 
     if (isEditable) {
         button.textContent = "Edit";
-        updateEmployeeRowData(row);
+        if (validateEmployeeRowData(row)) {
+            updateEmployeeRowData(row);
+        } else {
+            document.getElementById("errorMessage").innerHTML = "Enter Valid Data";
+            manageEmployee();
+        }
     } else {
         button.textContent = "Update";
     }
@@ -394,7 +539,7 @@ function updateEmployeeRowData(row) {
         email: cells[2].textContent,
         password: cells[3].textContent,
         phone: cells[4].textContent,
-        gender: cells[5].textContent,
+        gender: cells[5].querySelector("select").value,
         address: cells[6].textContent,
         position: cells[7].textContent
     };
@@ -428,38 +573,79 @@ function addEmployeeRow() {
 }
 function saveEmployeeRow(button) {
     var row = button.parentElement.parentElement;
-    var cells = row.getElementsByTagName("td");
+    if (validateEmployeeRowData(row)) {
+        var cells = row.getElementsByTagName("td");
 
-    var rowData = {
-        name: cells[1].textContent,
-        email: cells[2].textContent,
-        password: cells[3].textContent,
-        phone: cells[4].textContent,
-        gender: cells[5].textContent,
-        address: cells[6].textContent,
-        position: cells[7].textContent
-    };
+        var rowData = {
+            name: cells[1].textContent,
+            email: cells[2].textContent,
+            password: cells[3].textContent,
+            phone: cells[4].textContent,
+            gender: cells[5].querySelector("select").value,
+            address: cells[6].textContent,
+            position: cells[7].textContent
+        };
 
-    fetch("../control/add_employee.php", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify(rowData)
-    })
-        .then(function (response) {
-            return response.text();
+        fetch("../control/add_employee.php", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(rowData)
         })
-        .then(function (data) {
-            document.getElementById("output").innerHTML += "<p>" + data + "</p>";
-            manageEmployee();
-        });
+            .then(function (response) {
+                return response.text();
+            })
+            .then(function (data) {
+                document.getElementById("output").innerHTML += "<p>" + data + "</p>";
+                manageEmployee();
+            });
+    }
+    else {
+        document.getElementById("errorMessage").innerHTML = "Enter Valid Data";
+        manageEmployee();
+    }
+
+}
+function validateEmployeeRowData(row) {
+    var cells = row.getElementsByTagName("td");
+    var name = cells[1].textContent.trim();
+    var email = cells[2].textContent.trim();
+    var password = cells[3].textContent.trim();
+    var phone = cells[4].textContent.trim();
+    var gender = cells[5].querySelector("select").value;
+    var address = cells[6].textContent.trim();
+    const regexname = /^[A-Za-z\s]+$/;
+    const regexemail = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    const phoneRegex = /^01[0-9]{9}$/;
+    const passwordRegex = /[!@#$%^&*()_\-+=\[\]{};':"\\|,.<>\/?]/;
+
+    // Validation rules
+    if (name === "" ||
+        email === "" ||
+        password === "" ||
+        phone === "" ||
+        gender === "" ||
+        address === "" ||
+        !regexname.test(name) ||
+        !regexemail.test(email) ||
+        !passwordRegex.test(password) ||
+        !phoneRegex.test(phone)
+        || (gender !== "Male" && gender !== "Female" && gender !== "Other")
+
+    ) {
+        return false; // Invalid data
+    }
+    return true; // Valid data
 }
 
 
 //seller management
 function manageSeller(searchEmail = "") {
     document.getElementById("sellerSearch").style.display = "block";
+    document.getElementById("adminSearch").style.display = "none";
+    document.getElementById("customerSearch").style.display = "none";
+    document.getElementById("employeeSearch").style.display = "none";
     fetch("../control/manage_seller_control.php", {
         method: "POST",
         headers: {
@@ -505,7 +691,12 @@ function editSellerRow(button) {
 
     if (isEditable) {
         button.textContent = "Edit";
-        updateSellerRowData(row);
+        if (validateSellerRowData(row)) {
+            updateSellerRowData(row);
+        } else {
+            document.getElementById("errorMessage").innerHTML = "Enter Valid Data";
+            manageSeller();
+        }
     } else {
         button.textContent = "Update";
     }
@@ -569,36 +760,72 @@ function addSellerRow() {
 }
 function saveSellerRow(button) {
     var row = button.parentElement.parentElement;
-    var cells = row.getElementsByTagName("td");
+    if (validateSellerRowData(row)){
+        var cells = row.getElementsByTagName("td");
 
-    var rowData = {
-        name: cells[1].textContent,
-        email: cells[2].textContent,
-        shop_name: cells[3].textContent,
-        address: cells[4].textContent,
-        password: cells[5].textContent,
-        phone: cells[6].textContent
-    };
-
-    fetch("../control/add_seller.php", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify(rowData)
-    })
-        .then(function (response) {
-            return response.text();
+        var rowData = {
+            name: cells[1].textContent,
+            email: cells[2].textContent,
+            shop_name: cells[3].textContent,
+            address: cells[4].textContent,
+            password: cells[5].textContent,
+            phone: cells[6].textContent
+        };
+    
+        fetch("../control/add_seller.php", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(rowData)
         })
-        .then(function (data) {
-            document.getElementById("output").innerHTML += "<p>" + data + "</p>";
-            manageSeller();
-        });
+            .then(function (response) {
+                return response.text();
+            })
+            .then(function (data) {
+                document.getElementById("output").innerHTML += "<p>" + data + "</p>";
+                manageSeller();
+            });
+    }
+    else{
+        document.getElementById("errorMessage").innerHTML = "Enter Valid Data";
+        manageSeller();
+    }
+    
+}
+function validateSellerRowData(row) {
+    var cells = row.getElementsByTagName("td");
+    var name = cells[1].textContent.trim();
+    var email = cells[2].textContent.trim();
+    var shopname = cells[3].textContent.trim();
+    var address = cells[4].textContent.trim();
+    var password = cells[5].textContent.trim();
+    var phone = cells[6].textContent.trim();
+    
+    const regexname = /^[A-Za-z\s]+$/;
+    const regexemail = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    const phoneRegex = /^01[0-9]{9}$/;
+    const passwordRegex = /[!@#$%^&*()_\-+=\[\]{};':"\\|,.<>\/?]/;
+
+    // Validation rules
+    if (name === "" ||
+        email === "" ||
+        password === "" ||
+        phone === "" ||
+        shopname === "" ||
+        address === "" ||
+        !regexname.test(name) ||
+        !regexemail.test(email) ||
+        !passwordRegex.test(password) ||
+        !phoneRegex.test(phone)
+    ) {
+        return false; // Invalid data
+    }
+    return true; // Valid data
 }
 
-
 //travel accessories management
-function travelAccessories(){
+function travelAccessories() {
     const travelAccessories = document.getElementById("travelAccessories");
     if (travelAccessories.style.display === "none" || travelAccessories.style.display === "") {
         travelAccessories.style.display = "block";
@@ -642,9 +869,8 @@ function approveNewAccessories() {
     printAccessories("../control/approve_new_accessories.php", "output");
 }
 
-
 //travel packages management
-function tourPackages(){
+function tourPackages() {
     const tourPackages = document.getElementById("tourPackages");
     if (tourPackages.style.display === "none" || tourPackages.style.display === "") {
         tourPackages.style.display = "block";

@@ -12,16 +12,16 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             die("Connection failed: " . $conn->connect_error);
         }
 
-        foreach ($data as $employee) {
-            $seller_id = $conn->real_escape_string($employee['seller_id']);
-            $name = $conn->real_escape_string($employee['name']);
-            $email = $conn->real_escape_string($employee['email']);
-            $shop_name = $conn->real_escape_string($employee['shop_name']);
-            $address = $conn->real_escape_string($employee['address']);
-            $password = $conn->real_escape_string($employee['password']);
-            $phone = $conn->real_escape_string($employee['phone']);
+        foreach ($data as $seller) {
+            $seller_id = $conn->real_escape_string($seller['seller_id']);
+            $name = $conn->real_escape_string($seller['name']);
+            $email = $conn->real_escape_string($seller['email']);
+            $shop_name = $conn->real_escape_string($seller['shop_name']);
+            $address = $conn->real_escape_string($seller['address']);
+            $password = $conn->real_escape_string($seller['password']);
+            $phone = $conn->real_escape_string($seller['phone']);
 
-            $sql = "UPDATE employee SET 
+            $sql = "UPDATE seller SET 
                         name = '$name', 
                         email = '$email',
                         shop_name = '$shop_name', 

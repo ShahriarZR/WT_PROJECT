@@ -29,6 +29,7 @@
         </form>
     </fieldset>
     <?php
+    session_start();
     if ($_SERVER["REQUEST_METHOD"] === "POST")
     {
         include '../model/mydb.php';
@@ -36,6 +37,9 @@
         $conn = $db->openCon();
         $result = $db->login($conn, $_POST["email"], $_POST["password"]);
         if ($result && $result->num_rows > 0) {
+            $admin = $result->fetch_assoc();
+            $_SESSION["admin_email"] = $admin["email"];
+            $_SESSION["admin_name"] = $admin["name"];
             header("LOCATION: ../view/admin_panel.php");
         } else {
             echo "Wrong Email/Password";

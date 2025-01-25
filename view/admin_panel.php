@@ -1,3 +1,11 @@
+<?php
+session_start();
+if (!isset($_SESSION["admin_email"])) {
+    header("Location: admin_login.php");
+    exit();
+}
+?>
+
 <!DOCTYPE html>
 <html>
 
@@ -7,7 +15,7 @@
 </head>
 
 <body>
-    <h1>Admin</h1>
+    <h1>Admin: <?php echo htmlspecialchars($_SESSION["admin_name"]); ?>!</h1>
     <ul style="list-style-type:none;">
         <li><button onclick="dashboard()">Dashboard</button>
             <ul id="adminDashboard" style="list-style-type:none; display:none;">
@@ -29,6 +37,7 @@
                 <li><button onclick="approveNewPackages()">Approve New Packages</button></li>
             </ul>
         </li>
+        <li><a href="../control/logout_control.php"><button>Logout</button></a></li>
     </ul>
     <div id="adminSearch" style="display:none;">
         <input type="text" id="searchEmail" placeholder="Enter email to search" />
@@ -36,17 +45,19 @@
     </div>
     <div id="customerSearch" style="display:none;">
         <input type="text" id="searchCustomerEmail" placeholder="Enter email to search" />
-        <button onclick="searchUserByEmail()">Search</button>
+        <button onclick="searchCustomerByEmail()">Search</button>
     </div>
     <div id="employeeSearch" style="display:none;">
         <input type="text" id="searchEmployeeEmail" placeholder="Enter email to search" />
-        <button onclick="searchUserByEmail()">Search</button>
+        <button onclick="searchEmployeeByEmail()">Search</button>
     </div>
     <div id="sellerSearch" style="display:none;">
         <input type="text" id="searchSellerEmail" placeholder="Enter email to search" />
-        <button onclick="searchUserByEmail()">Search</button>
+        <button onclick="searchSellerByEmail()">Search</button>
     </div>
+
     <div id="output"></div>
+    <div id="errorMessage"></div>
 </body>
 
 </html>
