@@ -1,19 +1,52 @@
+var link = document.createElement('link');
+link.rel = 'stylesheet';
+link.type = 'text/css';
+link.href = '../style/style.css';
+document.head.appendChild(link);
+
+//reg validation
 function validateName() {
     var name = document.getElementById("name").value;
-    const regexname = /^[A-Za-z]+$/;
+    const regexname = /^[A-Za-z\s]+$/;
     if (!regexname.test(name)) {
         document.getElementById("invalidName").innerHTML = "Enter a valid Name";
-        flag = false;
+        return false;
     }
 }
 function validateEmail() {
-    var email = document.getElementById("email").value;
+    const checkEmail = document.getElementById("email").value;
     const regexemail = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-    if (!regexemail.test(email)) {
+
+    if (!regexemail.test(checkEmail)) {
         document.getElementById("invalidEmail").innerHTML = "Enter a valid Email";
-        flag = false;
+        return false; // Invalid email format
     }
 }
+/* function availableEmail(){
+    const checkEmail = document.getElementById("email").value;
+    // Check if the email already exists in the database
+    fetch("../control/admin_reg_email_exist_check.php", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({ checkEmail: checkEmail })
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.exists) {
+                // Email already exists
+                showPopup("This email is already registered. Please use a different email.");
+                return false;
+            } else {
+                // Email is valid and does not exist
+                showPopup("Email is valid and available.");
+                return true;
+            }
+        })
+        .catch(error => {
+            console.error("Error checking email existence:", error);
+            showPopup("An error occurred while checking the email. Please try again later.");
+        });
+} */
 function validatePhone() {
     var phone = document.getElementById("phone").value;
     const phoneRegex = /^01[0-9]{9}$/;
@@ -43,10 +76,15 @@ function validateConfPassword() {
 }
 function validateForm() {
     if (validateName() == false || validateEmail() == false || validatePhone() == false || validatePassword() == false || validateConfPassword() == false) {
-        return false;
+        /* if(availableEmail()==false)
+        {
+            return false;
+        } */
+       return false;
     }
 }
 
+//admin panel
 //admin management
 function dashboard() {
     const adminDashboard = document.getElementById("adminDashboard");
@@ -62,6 +100,7 @@ function manageAdmin(searchEmail = "") {
     document.getElementById("customerSearch").style.display = "none";
     document.getElementById("employeeSearch").style.display = "none";
     document.getElementById("sellerSearch").style.display = "none";
+    
     fetch("../control/manage_admin_control.php", {
         method: "POST",
         headers: {
@@ -69,34 +108,37 @@ function manageAdmin(searchEmail = "") {
         },
         body: JSON.stringify({ email: searchEmail })
     })
-        .then(response => response.json())
-        .then(data => {
-            if (Array.isArray(data) && data.length > 0) {
-                var table = "<table border='1' id='adminTable'><tr><th>Serial</th><th>Name</th><th>Email</th><th>Password</th><th>Phone</th><th>Gender</th><th>Address</th><th>Actions</th></tr>";
-                data.forEach(function (row) {
-                    table += "<tr>" +
-                        "<td>" + row.admin_id + "</td>" +
-                        "<td contenteditable='false'>" + row.name + "</td>" +
-                        "<td contenteditable='false'>" + row.email + "</td>" +
-                        "<td contenteditable='false'>" + row.password + "</td>" +
-                        "<td contenteditable='false'>" + row.phone + "</td>" +
-                        "<td contenteditable='false'>" +
-                        "<select disabled>" +
-                        "<option value='Male'" + (row.gender === "Male" ? " selected" : "") + ">Male</option>" +
-                        "<option value='Female'" + (row.gender === "Female" ? " selected" : "") + ">Female</option>" +
-                        "<option value='Other'" + (row.gender === "Other" ? " selected" : "") + ">Other</option>" +
-                        "</select>" +
-                        "</td>" +
-                        "<td contenteditable='false'>" + row.address + "</td>" +
-                        "<td><button onclick='AdminEditRow(this)'>Edit</button><button onclick='deleteAdminRow(this)'>Delete</button></td>" +
-                        "</tr>";
-                });
-                table += "</table><button id='addButton' onclick='addAdminRow()'>Add</button>";
-                document.getElementById("output").innerHTML = table;
-            } else {
-                document.getElementById("output").innerHTML = "No results found.";
-            }
-        });
+    .then(response => response.json())
+    .then(data => {
+        if (Array.isArray(data) && data.length > 0) {
+            var table = "<table border='1' id='adminTable'><tr><th>Serial</th><th>Name</th><th>Email</th><th>Password</th><th>Phone</th><th>Gender</th><th>Address</th><th>Actions</th></tr>";
+            data.forEach(function (row) {
+                table += "<tr>" +
+                    "<td>" + row.admin_id + "</td>" +
+                    "<td contenteditable='false'>" + row.name + "</td>" +
+                    "<td contenteditable='false'>" + row.email + "</td>" +
+                    "<td contenteditable='false'>" + row.password + "</td>" +
+                    "<td contenteditable='false'>" + row.phone + "</td>" +
+                    "<td contenteditable='false'>" +
+                    "<select disabled>" +
+                    "<option value='Male'" + (row.gender === "Male" ? " selected" : "") + ">Male</option>" +
+                    "<option value='Female'" + (row.gender === "Female" ? " selected" : "") + ">Female</option>" +
+                    "<option value='Other'" + (row.gender === "Other" ? " selected" : "") + ">Other</option>" +
+                    "</select>" +
+                    "</td>" +
+                    "<td contenteditable='false'>" + row.address + "</td>" +
+                    "<td><button onclick='AdminEditRow(this)'>Edit</button><button onclick='deleteAdminRow(this)'>Delete</button></td>" +
+                    "</tr>";
+            });
+            table += "</table><button id='addButton' onclick='addAdminRow()'>Add</button>";
+            document.getElementById("output").innerHTML = table;
+        } else {
+            showPopup("No results found.");
+        }
+    })
+    .catch(error => {
+        showPopup("Error loading admin data: " + error.message);
+    });
 }
 function searchAdminEmail() {
     var searchEmail = document.getElementById("searchEmail").value.trim();
@@ -109,7 +151,6 @@ function AdminEditRow(button) {
 
     for (var i = 1; i < cells.length - 1; i++) { // Skip Serial and Actions column
         if (i === 5) {
-            // Toggle dropdown enable/disable for gender column
             var select = cells[i].querySelector("select");
             if (select) {
                 select.disabled = isEditable;
@@ -124,7 +165,7 @@ function AdminEditRow(button) {
         if (validateAdminRowData(row)) {
             updateAdminRowData(row);
         } else {
-            document.getElementById("errorMessage").innerHTML = "Enter Valid Data";
+            showPopup("Enter Valid Data");
             manageAdmin();
         }
     } else {
@@ -150,11 +191,14 @@ function updateAdminRowData(row) {
         },
         body: JSON.stringify([rowData])
     })
-        .then(response => response.text())
-        .then(data => {
-            document.getElementById("output").innerHTML += "<p>" + data + "</p>";
-            manageAdmin();
-        });
+    .then(response => response.text())
+    .then(data => {
+        showPopup(data);
+        manageAdmin();
+    })
+    .catch(error => {
+        showPopup("Error updating admin data: " + error.message);
+    });
 }
 function deleteAdminRow(button) {
     var row = button.parentElement.parentElement;
@@ -167,12 +211,15 @@ function deleteAdminRow(button) {
         },
         body: JSON.stringify({ admin_id: adminId })
     })
-        .then(response => response.text())
-        .then(data => {
-            document.getElementById("output").innerHTML += "<p>" + data + "</p>";
-            row.remove();
-            manageAdmin();
-        });
+    .then(response => response.text())
+    .then(data => {
+        showPopup(data);
+        row.remove();
+        manageAdmin();
+    })
+    .catch(error => {
+        showPopup("Error deleting admin data: " + error.message);
+    });
 }
 function addAdminRow() {
     var table = document.getElementById("adminTable");
@@ -180,7 +227,26 @@ function addAdminRow() {
 
     for (var i = 0; i < 8; i++) {
         var cell = row.insertCell(i);
-        if (i < 7) {
+        if (i === 5) {
+            var select = document.createElement("select");
+            var option1 = document.createElement("option");
+            option1.value = "Male";
+            option1.textContent = "Male";
+            select.appendChild(option1);
+
+            var option2 = document.createElement("option");
+            option2.value = "Female";
+            option2.textContent = "Female";
+            select.appendChild(option2);
+
+            var option3 = document.createElement("option");
+            option3.value = "Other";
+            option3.textContent = "Other";
+            select.appendChild(option3);
+
+            cell.appendChild(select);  // Add the dropdown to cell 5
+        }
+        else if (i < 7) {
             cell.contentEditable = "true";
         } else {
             cell.innerHTML = "<button onclick='saveAdminRow(this)'>Save</button>";
@@ -209,18 +275,19 @@ function saveAdminRow(button) {
             },
             body: JSON.stringify(rowData)
         })
-            .then(function (response) {
-                return response.text();
-            })
-            .then(function (data) {
-                document.getElementById("output").innerHTML += "<p>" + data + "</p>";
-            });
+        .then(response => response.text())
+        .then(data => {
+            showPopup(data);
+            manageAdmin();
+        })
+        .catch(error => {
+            showPopup("Error saving admin data: " + error.message);
+        });
     }
     else {
-        document.getElementById("errorMessage").innerHTML = "Enter Valid Data";
+        showPopup("Enter Valid Data");
         manageAdmin();
     }
-
 }
 function validateAdminRowData(row) {
     var cells = row.getElementsByTagName("td");
@@ -249,6 +316,7 @@ function validateAdminRowData(row) {
         || (gender !== "Male" && gender !== "Female" && gender !== "Other")
 
     ) {
+        showPopup("Enter Valid Data");
         return false; // Invalid data
     }
     return true; // Valid data
@@ -261,6 +329,7 @@ function manageCustomer(searchEmail = "") {
     document.getElementById("adminSearch").style.display = "none";
     document.getElementById("employeeSearch").style.display = "none";
     document.getElementById("sellerSearch").style.display = "none";
+
     fetch("../control/manage_customer_control.php", {
         method: "POST",
         headers: {
@@ -268,34 +337,37 @@ function manageCustomer(searchEmail = "") {
         },
         body: JSON.stringify({ email: searchEmail })
     })
-        .then(response => response.json())
-        .then(data => {
-            if (Array.isArray(data) && data.length > 0) {
-                var table = "<table border='1' id='customerTable'><tr><th>Serial</th><th>Name</th><th>Email</th><th>Password</th><th>Phone</th><th>Gender</th><th>Address</th><th>Actions</th></tr>";
-                data.forEach(function (row) {
-                    table += "<tr>" +
-                        "<td>" + row.customer_id + "</td>" +
-                        "<td contenteditable='false'>" + row.name + "</td>" +
-                        "<td contenteditable='false'>" + row.email + "</td>" +
-                        "<td contenteditable='false'>" + row.password + "</td>" +
-                        "<td contenteditable='false'>" + row.phone + "</td>" +
-                        "<td contenteditable='false'>" +
-                        "<select disabled>" +
-                        "<option value='Male'" + (row.gender === "Male" ? " selected" : "") + ">Male</option>" +
-                        "<option value='Female'" + (row.gender === "Female" ? " selected" : "") + ">Female</option>" +
-                        "<option value='Other'" + (row.gender === "Other" ? " selected" : "") + ">Other</option>" +
-                        "</select>" +
-                        "</td>" +
-                        "<td contenteditable='false'>" + row.address + "</td>" +
-                        "<td><button onclick='editCustomerRow(this)'>Edit</button><button onclick='deleteCustomerRow(this)'>Delete</button></td>" +
-                        "</tr>";
-                });
-                table += "</table><button id='addCustomerButton' onclick='addCustomerRow()'>Add</button>";
-                document.getElementById("output").innerHTML = table;
-            } else {
-                document.getElementById("output").innerHTML = "No results found.";
-            }
-        });
+    .then(response => response.json())
+    .then(data => {
+        if (Array.isArray(data) && data.length > 0) {
+            var table = "<table border='1' id='customerTable'><tr><th>Serial</th><th>Name</th><th>Email</th><th>Password</th><th>Phone</th><th>Gender</th><th>Address</th><th>Actions</th></tr>";
+            data.forEach(function (row) {
+                table += "<tr>" +
+                    "<td>" + row.customer_id + "</td>" +
+                    "<td contenteditable='false'>" + row.name + "</td>" +
+                    "<td contenteditable='false'>" + row.email + "</td>" +
+                    "<td contenteditable='false'>" + row.password + "</td>" +
+                    "<td contenteditable='false'>" + row.phone + "</td>" +
+                    "<td contenteditable='false'>" +
+                    "<select disabled>" +
+                    "<option value='Male'" + (row.gender === "Male" ? " selected" : "") + ">Male</option>" +
+                    "<option value='Female'" + (row.gender === "Female" ? " selected" : "") + ">Female</option>" +
+                    "<option value='Other'" + (row.gender === "Other" ? " selected" : "") + ">Other</option>" +
+                    "</select>" +
+                    "</td>" +
+                    "<td contenteditable='false'>" + row.address + "</td>" +
+                    "<td><button onclick='editCustomerRow(this)'>Edit</button><button onclick='deleteCustomerRow(this)'>Delete</button></td>" +
+                    "</tr>";
+            });
+            table += "</table><button id='addCustomerButton' onclick='addCustomerRow()'>Add</button>";
+            document.getElementById("output").innerHTML = table;
+        } else {
+            showPopup("No results found."); // Show message in popup if no customers are found
+        }
+    })
+    .catch(error => {
+        showPopup("Error loading customer data: " + error.message); // Show error in popup if there's an issue fetching data
+    });
 }
 function searchCustomerByEmail() {
     var searchEmail = document.getElementById("searchCustomerEmail").value.trim();
@@ -349,11 +421,11 @@ function updateCustomerRow(row) {
         },
         body: JSON.stringify([rowData])
     })
-        .then(response => response.text())
-        .then(data => {
-            document.getElementById("output").innerHTML += "<p>" + data + "</p>";
-            manageCustomer();
-        });
+    .then(response => response.text())
+    .then(data => {
+        showPopup(data); // Display the server response in a popup
+        manageCustomer();
+    });
 }
 function deleteCustomerRow(button) {
     var row = button.parentElement.parentElement;
@@ -366,12 +438,12 @@ function deleteCustomerRow(button) {
         },
         body: JSON.stringify({ customer_id: customerId })
     })
-        .then(response => response.text())
-        .then(data => {
-            document.getElementById("output").innerHTML += "<p>" + data + "</p>";
-            row.remove();
-            manageCustomer();
-        });
+    .then(response => response.text())
+    .then(data => {
+        showPopup(data); // Display the server response in a popup
+        row.remove();
+        manageCustomer();
+    });
 }
 function addCustomerRow() {
     var table = document.getElementById("customerTable");
@@ -379,7 +451,26 @@ function addCustomerRow() {
 
     for (var i = 0; i < 8; i++) {
         var cell = row.insertCell(i);
-        if (i < 7) {
+        if (i === 5) {
+            var select = document.createElement("select");
+            var option1 = document.createElement("option");
+            option1.value = "Male";
+            option1.textContent = "Male";
+            select.appendChild(option1);
+
+            var option2 = document.createElement("option");
+            option2.value = "Female";
+            option2.textContent = "Female";
+            select.appendChild(option2);
+
+            var option3 = document.createElement("option");
+            option3.value = "Other";
+            option3.textContent = "Other";
+            select.appendChild(option3);
+
+            cell.appendChild(select);  // Add the dropdown to cell 5
+        }
+        else if (i < 7) {
             cell.contentEditable = "true";
         } else {
             cell.innerHTML = "<button onclick='saveCustomerRow(this)'>Save</button>";
@@ -408,19 +499,18 @@ function saveCustomerRow(button) {
             },
             body: JSON.stringify(rowData)
         })
-            .then(function (response) {
-                return response.text();
-            })
-            .then(function (data) {
-                document.getElementById("output").innerHTML += "<p>" + data + "</p>";
-                manageCustomer();
-            });
+        .then(function (response) {
+            return response.text();
+        })
+        .then(function (data) {
+            showPopup(data); // Display the server response in a popup
+            manageCustomer();
+        });
     }
     else {
-        document.getElementById("errorMessage").innerHTML = "Enter Valid Data";
+        showPopup("Enter Valid Data"); // Show validation error in a popup
         manageCustomer();
     }
-
 }
 function validateCustomerRowData(row) {
     var cells = row.getElementsByTagName("td");
@@ -447,12 +537,13 @@ function validateCustomerRowData(row) {
         !passwordRegex.test(password) ||
         !phoneRegex.test(phone)
         || (gender !== "Male" && gender !== "Female" && gender !== "Other")
-
     ) {
+        showPopup("Enter Valid Data"); // Show validation error in a popup
         return false; // Invalid data
     }
     return true; // Valid data
 }
+
 
 
 //employee management
@@ -494,7 +585,7 @@ function manageEmployee(searchEmail = "") {
                 table += "</table><button id='addEmployeeButton' onclick='addEmployeeRow()'>Add</button>";
                 document.getElementById("output").innerHTML = table;
             } else {
-                document.getElementById("output").innerHTML = "No results found.";
+                showPopup("No results found.");
             }
         });
 }
@@ -524,7 +615,7 @@ function editEmployeeRow(button) {
         if (validateEmployeeRowData(row)) {
             updateEmployeeRowData(row);
         } else {
-            document.getElementById("errorMessage").innerHTML = "Enter Valid Data";
+            showPopup("Enter Valid Data");
             manageEmployee();
         }
     } else {
@@ -553,17 +644,54 @@ function updateEmployeeRowData(row) {
     })
         .then(response => response.text())
         .then(data => {
-            document.getElementById("output").innerHTML += "<p>" + data + "</p>";
-            manageEmployee();
+            // Show the response from the server in the popup instead of innerHTML
+            showPopup(data);
+            manageEmployee();  // Refresh the employee list after update
         });
+}
+function deleteEmployeeRow(button) {
+    var row = button.parentElement.parentElement;
+    var employeeId = row.getElementsByTagName("td")[0].textContent;
+
+    fetch("../control/delete_employee.php", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ employee_id: employeeId })
+    })
+    .then(response => response.text())
+    .then(data => {
+        showPopup(data); // Display the server response in a popup
+        row.remove();
+        manageEmployee();
+    });
 }
 function addEmployeeRow() {
     var table = document.getElementById("employeeTable");
     var row = table.insertRow(-1);
-
     for (var i = 0; i < 9; i++) {
         var cell = row.insertCell(i);
-        if (i < 8) {
+        if (i === 5) {
+            var select = document.createElement("select");
+            var option1 = document.createElement("option");
+            option1.value = "Male";
+            option1.textContent = "Male";
+            select.appendChild(option1);
+
+            var option2 = document.createElement("option");
+            option2.value = "Female";
+            option2.textContent = "Female";
+            select.appendChild(option2);
+
+            var option3 = document.createElement("option");
+            option3.value = "Other";
+            option3.textContent = "Other";
+            select.appendChild(option3);
+
+            cell.appendChild(select);  // Add the dropdown to cell 5
+        }
+        else if (i < 8) {
             cell.contentEditable = "true";
         } else {
             cell.innerHTML = "<button onclick='saveEmployeeRow(this)'>Save</button>";
@@ -597,15 +725,13 @@ function saveEmployeeRow(button) {
                 return response.text();
             })
             .then(function (data) {
-                document.getElementById("output").innerHTML += "<p>" + data + "</p>";
+                showPopup(data);
                 manageEmployee();
             });
-    }
-    else {
-        document.getElementById("errorMessage").innerHTML = "Enter Valid Data";
+    } else {
+        showPopup("Enter Valid Data");
         manageEmployee();
     }
-
 }
 function validateEmployeeRowData(row) {
     var cells = row.getElementsByTagName("td");
@@ -646,6 +772,7 @@ function manageSeller(searchEmail = "") {
     document.getElementById("adminSearch").style.display = "none";
     document.getElementById("customerSearch").style.display = "none";
     document.getElementById("employeeSearch").style.display = "none";
+
     fetch("../control/manage_seller_control.php", {
         method: "POST",
         headers: {
@@ -672,8 +799,12 @@ function manageSeller(searchEmail = "") {
                 table += "</table><button id='addSellerButton' onclick='addSellerRow()'>Add</button>";
                 document.getElementById("output").innerHTML = table;
             } else {
-                document.getElementById("output").innerHTML = "No results found.";
+                showPopup("No results found.");
+                document.getElementById("output").innerHTML = "";
             }
+        })
+        .catch(error => {
+            showPopup("An error occurred: " + error.message);
         });
 }
 function searchSellerByEmail() {
@@ -685,7 +816,7 @@ function editSellerRow(button) {
     var cells = row.getElementsByTagName("td");
     var isEditable = cells[1].contentEditable === "true";
 
-    for (var i = 1; i < cells.length - 1; i++) { // Skip Serial and Actions column
+    for (var i = 1; i < cells.length - 1; i++) {
         cells[i].contentEditable = !isEditable;
     }
 
@@ -694,8 +825,7 @@ function editSellerRow(button) {
         if (validateSellerRowData(row)) {
             updateSellerRowData(row);
         } else {
-            document.getElementById("errorMessage").innerHTML = "Enter Valid Data";
-            manageSeller();
+            showPopup("Enter valid data!");
         }
     } else {
         button.textContent = "Update";
@@ -722,8 +852,11 @@ function updateSellerRowData(row) {
     })
         .then(response => response.text())
         .then(data => {
-            document.getElementById("output").innerHTML += "<p>" + data + "</p>";
+            showPopup(data);
             manageSeller();
+        })
+        .catch(error => {
+            showPopup("Error updating seller: " + error.message);
         });
 }
 function deleteSellerRow(button) {
@@ -739,9 +872,12 @@ function deleteSellerRow(button) {
     })
         .then(response => response.text())
         .then(data => {
-            document.getElementById("output").innerHTML += "<p>" + data + "</p>";
+            showPopup(data);
             row.remove();
             manageSeller();
+        })
+        .catch(error => {
+            showPopup("Error deleting seller: " + error.message);
         });
 }
 function addSellerRow() {
@@ -760,7 +896,7 @@ function addSellerRow() {
 }
 function saveSellerRow(button) {
     var row = button.parentElement.parentElement;
-    if (validateSellerRowData(row)){
+    if (validateSellerRowData(row)) {
         var cells = row.getElementsByTagName("td");
 
         var rowData = {
@@ -771,7 +907,7 @@ function saveSellerRow(button) {
             password: cells[5].textContent,
             phone: cells[6].textContent
         };
-    
+
         fetch("../control/add_seller.php", {
             method: "POST",
             headers: {
@@ -779,19 +915,17 @@ function saveSellerRow(button) {
             },
             body: JSON.stringify(rowData)
         })
-            .then(function (response) {
-                return response.text();
-            })
-            .then(function (data) {
-                document.getElementById("output").innerHTML += "<p>" + data + "</p>";
+            .then(response => response.text())
+            .then(data => {
+                showPopup(data);
                 manageSeller();
+            })
+            .catch(error => {
+                showPopup("Error adding seller: " + error.message);
             });
+    } else {
+        showPopup("Enter valid data!");
     }
-    else{
-        document.getElementById("errorMessage").innerHTML = "Enter Valid Data";
-        manageSeller();
-    }
-    
 }
 function validateSellerRowData(row) {
     var cells = row.getElementsByTagName("td");
@@ -801,7 +935,7 @@ function validateSellerRowData(row) {
     var address = cells[4].textContent.trim();
     var password = cells[5].textContent.trim();
     var phone = cells[6].textContent.trim();
-    
+
     const regexname = /^[A-Za-z\s]+$/;
     const regexemail = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     const phoneRegex = /^01[0-9]{9}$/;
@@ -858,7 +992,8 @@ function printAccessories(url, outputElement) {
                 table += "</table>";
                 document.getElementById(outputElement).innerHTML = table;
             } else {
-                document.getElementById(outputElement).innerHTML = "No data found.";
+                showPopup("No data found.");
+                document.getElementById(outputElement).innerHTML = "";
             }
         });
 }
@@ -903,7 +1038,8 @@ function printPackages(url, outputElement) {
                 table += "</table>";
                 document.getElementById(outputElement).innerHTML = table;
             } else {
-                document.getElementById(outputElement).innerHTML = "No data found.";
+                showPopup("No data found.");
+                document.getElementById(outputElement).innerHTML = "";
             }
         });
 }
@@ -913,3 +1049,152 @@ function viewAllPackages() {
 function approveNewPackages() {
     printPackages("../control/approve_new_package.php", "output");
 }
+
+
+//profile
+function viewProfile() {
+    fetch("../control/admin_profile_control.php", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        }
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                var profileHtml =
+                    "<h2>Admin Profile</h2>" +
+                    "<div id='adminProfile'>" +
+                    "<p><strong>Name:</strong> <span id='nameDisplay'>" + data.name + "</span></p>" +
+                    "<p><strong>Email:</strong> <span id='emailDisplay'>" + data.email + "</span></p>" +
+                    "<p><strong>Phone:</strong> <span id='phoneDisplay'>" + data.phone + "</span></p>" +
+                    "<p><strong>Gender:</strong> <span id='genderDisplay'>" + data.gender + "</span></p>" +
+                    "<p><strong>Address:</strong> <span id='addressDisplay'>" + data.address + "</span></p>" +
+                    "<button onclick='enableEditProfile()'>Edit Profile</button> " +
+                    "<button onclick='enableChangePassword()'>Change Password</button>" +
+                    "</div>" +
+                    "<div id='editAdminProfile' style='display: none;'>" +
+                    "<p><strong>Name:</strong> <input type='text' id='editName' value='" + data.name + "'></p>" +
+                    "<p><strong>Email:</strong> <input type='email' id='editEmail' value='" + data.email + "'></p>" +
+                    "<p><strong>Phone:</strong> <input type='text' id='editPhone' value='" + data.phone + "'></p>" +
+                    "<p><strong>Gender:</strong> <select id='editGender'>" +
+                    "<option value='Male'" + (data.gender === 'Male' ? " selected" : "") + ">Male</option>" +
+                    "<option value='Female'" + (data.gender === 'Female' ? " selected" : "") + ">Female</option>" +
+                    "</select></p>" +
+                    "<p><strong>Address:</strong> <input type='text' id='editAddress' value='" + data.address + "'></p>" +
+                    "<button onclick='saveProfile()'>Save</button>" +
+                    "<button onclick='cancelEdit()'>Cancel</button>" +
+                    "</div>" +
+                    "<div id='changePasswordSection' style='display: none;'>" +
+                    "<h3>Change Password</h3>" +
+                    "<p><strong>Current Password:</strong> <input type='password' id='currentPassword'></p>" +
+                    "<p><strong>New Password:</strong> <input type='password' id='newPassword'></p>" +
+                    "<p><strong>Confirm New Password:</strong> <input type='password' id='confirmNewPassword'></p>" +
+                    "<button onclick='saveNewPassword()'>Save Password</button>" +
+                    "<button onclick='cancelChangePassword()'>Cancel</button>" +
+                    "</div>";
+
+                document.getElementById("output").innerHTML = profileHtml;
+            } else {
+                showPopup("Error fetching profile data.");
+            }
+        })
+        .catch(error => {
+            showPopup("An error occurred while fetching the profile data.");
+        });
+}
+function enableEditProfile() {
+    document.getElementById("editAdminProfile").style.display = "block";
+    document.getElementById("adminProfile").style.display = "none";
+    document.getElementById("changePasswordSection").style.display = "none";
+}
+function enableChangePassword() {
+    document.getElementById("changePasswordSection").style.display = "block";
+    document.getElementById("adminProfile").style.display = "none";
+    document.getElementById("editAdminProfile").style.display = "none";
+}
+function cancelChangePassword() {
+    document.getElementById("changePasswordSection").style.display = "none";
+    document.getElementById("adminProfile").style.display = "block";
+}
+function saveNewPassword() {
+    const currentPassword = document.getElementById("currentPassword").value;
+    const newPassword = document.getElementById("newPassword").value;
+    const confirmNewPassword = document.getElementById("confirmNewPassword").value;
+    const passwordRegex = /[!@#$%^&*()_\-+=\[\]{};':"\\|,.<>\/?]/;
+
+    if (!passwordRegex.test(newPassword)) {
+        showPopup("Password must contain at least one special character.");
+        return;
+    }
+    if (newPassword !== confirmNewPassword) {
+        showPopup("New password and confirm password must be the same.");
+        return;
+    }
+
+    fetch("../control/admin_change_password_control.php", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            currentPassword: currentPassword,
+            newPassword: newPassword
+        })
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showPopup("Password changed successfully!");
+                cancelChangePassword();
+            } else {
+                showPopup(data.message || "Error changing password.");
+            }
+        })
+        .catch(error => {
+            showPopup("An error occurred while changing the password.");
+        });
+}
+function saveProfile() {
+    var updatedData = {
+        name: document.getElementById("editName").value.trim(),
+        email: document.getElementById("editEmail").value.trim(),
+        phone: document.getElementById("editPhone").value.trim(),
+        gender: document.getElementById("editGender").value,
+        address: document.getElementById("editAddress").value.trim()
+    };
+
+    fetch("../control/update_admin_profile.php", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(updatedData)
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showPopup("Profile updated successfully!");
+                viewProfile();
+            } else {
+                showPopup("Failed to update profile.");
+            }
+        })
+        .catch(error => {
+            showPopup("An error occurred while updating the profile.");
+        });
+}
+function cancelEdit() {
+    viewProfile();
+}
+
+//pop up message
+function showPopup(message) {
+    document.getElementById("popupMessage").textContent = message;
+    document.getElementById("popup").style.display = "flex";
+}
+
+function closePopup() {
+    document.getElementById("popup").style.display = "none";
+}
+

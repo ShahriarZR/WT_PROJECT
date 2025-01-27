@@ -15,12 +15,12 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
         $employee_id = $conn->real_escape_string($data['employee_id']);
 
-        $sql = "DELETE FROM customer WHERE employee_id = '$employee_id'";
+        $sql = "DELETE FROM employee WHERE employee_id = '$employee_id'";
 
         if ($conn->query($sql) === TRUE) {
             echo "Employee ID $employee_id deleted successfully.";
         } else {
-            echo "Error deleting admin ID $employee_id: " . $conn->error;
+            echo "Error deleting Employee ID $employee_id: " . $conn->error;
         }
 
         $conn->close();

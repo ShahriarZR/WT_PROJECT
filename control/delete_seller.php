@@ -18,7 +18,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $sql = "DELETE FROM seller WHERE seller_id = '$seller_id'";
 
         if ($conn->query($sql) === TRUE) {
-            echo "Seller ID $empseller_idloyee_id deleted successfully.";
+            echo "Seller ID $seller_id deleted successfully.";
         } else {
             echo "Error deleting Seller ID $seller_id: " . $conn->error;
         }

@@ -2,7 +2,8 @@
 <html lang="en">
 
 <head>
-    <title>Project Task 1</title>
+    <title>Admin Registration</title>
+    <link rel="stylesheet" href="../style/style.css">
     <script src="../js/myjs.js"></script>
 </head>
 
@@ -12,7 +13,7 @@
         <legend>
             <h3>New Admin</h3>
         </legend>
-        <form onsubmit="return validateForm()" action="../control/admin_reg_control.php" method="post">
+        <form onsubmit="return validateForm()" method="POST" action="../control/admin_reg_control.php">
             <table>
                 <tr>
                     <td>Full Name:</td>
@@ -71,13 +72,17 @@
                 </tr>
             </table>
         </form>
+        <div id="output"></div>
+        <div id="successMessage"></div>
+        <div id="errorMessage"></div>
 
-        <h6>1. Name Should be at least 4 characters<br>
-            2. Email Address field is required, and the input must contain aiub.edu domain<br>
-            3. Validate drop-down/select fields which user must select one option.<br>
-            4. Phone Number field must contain only numbers<br>
-            5. Password must have at least one special character and confirm password should match the password.<br>
-        </h6>
+        <!-- Pop up message -->
+        <div id="popup" style="display: none;">
+            <div id="popupContent">
+                <p id="popupMessage"></p>
+                <button onclick="closePopup()">OK</button>
+            </div>
+        </div>
 
     </fieldset>
 
