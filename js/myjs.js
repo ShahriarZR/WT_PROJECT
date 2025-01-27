@@ -669,7 +669,7 @@ function deleteEmployeeRow(button) {
         manageEmployee();
     });
 }
-function addEmployeeRow() {
+/* function addEmployeeRow() {
     var table = document.getElementById("employeeTable");
     var row = table.insertRow(-1);
     for (var i = 0; i < 9; i++) {
@@ -700,6 +700,66 @@ function addEmployeeRow() {
         }
     }
     row.cells[0].textContent = "New";
+} */
+function addEmployeeRow() {
+    var output = document.getElementById("employeeAdd");
+    var form = document.createElement("div");
+    form.id = "newPackageForm";
+
+    // Email input
+    var emailLabel = document.createElement("label");
+    emailLabel.textContent = "Email:";
+    form.appendChild(emailLabel);
+
+    var emailInput = document.createElement("input");
+    emailInput.type = "email";
+    emailInput.id = "addEmployeeEmail";
+    form.appendChild(emailInput);
+
+
+    // Submit button
+    var submitButton = document.createElement("button");
+    submitButton.textContent = "Submit";
+    submitButton.onclick = function () {
+        saveNewEmployee();
+    };
+    form.appendChild(submitButton);
+
+    // Clear output and append the form
+    output.innerHTML = "";
+    output.appendChild(form);
+}
+function saveNewEmployee() {
+    var email = document.getElementById("addEmployeeEmail").value;
+
+    // Validate input
+    if (!email) {
+        showPopup("Enter Email");
+        return;
+    }
+
+    // Send data to server
+    fetch("../control/add_new_employee_control.php", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            email: email
+        })
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showPopup("Email Added");
+                addEmployeeRow();
+            } else {
+                showPopup("Error adding email: " + data.message);
+            }
+        })
+        .catch(error => {
+            showPopup("Error: " + error.message);
+        });
 }
 function saveEmployeeRow(button) {
     var row = button.parentElement.parentElement;

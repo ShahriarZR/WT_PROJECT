@@ -64,6 +64,7 @@ if (!isset($_SESSION["admin_email"])) {
     
 
     <div id="output"></div>
+    <div id="employeeAdd"></div>
     <div id="successMessage"></div>
     <div id="errorMessage"></div>
 
