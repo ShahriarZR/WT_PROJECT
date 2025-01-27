@@ -4,6 +4,8 @@ link.type = 'text/css';
 link.href = '../style/style.css';
 document.head.appendChild(link);
 
+
+
 //reg validation
 function validateName() {
     var name = document.getElementById("name").value;
@@ -1014,6 +1016,88 @@ function tourPackages() {
         tourPackages.style.display = "none";
     }
 }
+function printApprovePackages(url, outputElement) {
+    fetch(url, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({})
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (Array.isArray(data) && data.length > 0) {
+                var table = "<table border='1'><tr><th>ID</th><th>Name</th><th>Description</th><th>Status</th><th>Price</th><th>Employee ID</th><th>Actions</th></tr>";
+                data.forEach(package => {
+                    table += "<tr>" +
+                        "<td>" + package.approve_tour_package_id + "</td>" +
+                        "<td>" + package.name + "</td>" +
+                        "<td>" + package.description + "</td>" +
+                        "<td>" + package.status + "</td>" +
+                        "<td>" + package.price + "</td>" +
+                        "<td>" + package.employee_id + "</td>" +
+                        "<td>" +
+                        "<button onclick='approvePackage(this)'>Approve</button>" +
+                        "<button onclick='rejectPackage(this)'>Reject</button>" +
+                        "</td>" +
+                        "</tr>";
+                });
+                table += "</table>";
+                document.getElementById(outputElement).innerHTML = table;
+            } else {
+                showPopup("No data found.");
+                document.getElementById(outputElement).innerHTML = "";
+            }
+        });
+}
+function approvePackage(button) {
+    //showPopup("i am here");
+    var row = button.parentElement.parentElement;
+    var cells = row.getElementsByTagName("td");    
+    var rowData = {
+        approve_tour_package_id: cells[0].textContent,
+        name: cells[1].textContent,
+        description: cells[2].textContent,
+        status: cells[3].textContent,
+        price: cells[4].textContent,
+        employee_id: cells[5].textContent
+    };   
+    fetch("../control/insert_tour_package.php", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify([rowData])
+    })
+        .then(response => response.text())
+        .then(result => {
+            showPopup(result);
+            approveNewPackages();
+        })
+        .catch(error => {
+            showPopup("Error loading admin data: " + error.message);
+        });
+}
+function rejectPackage(button) {
+    var row = button.parentElement.parentElement;
+    var cells = row.getElementsByTagName("td");
+    var rowData = {
+        approve_tour_package_id: cells[0].textContent
+    };
+
+    fetch("../control/delete_approve_tour_package.php", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify([rowData])
+    })
+        .then(response => response.text())
+        .then(result => {
+            showPopup(result);
+            approveNewPackages();
+        });
+}
 function printPackages(url, outputElement) {
     fetch(url, {
         method: "GET",
@@ -1024,14 +1108,14 @@ function printPackages(url, outputElement) {
         .then(response => response.json())
         .then(data => {
             if (Array.isArray(data) && data.length > 0) {
-                var table = "<table border='1'><tr><th>ID</th><th>Name</th><th>Description</th><th>Price</th><th>Stock</th><th>Seller ID</th></tr>";
+                var table = "<table border='1'><tr><th>ID</th><th>Name</th><th>Description</th><th>Price</th><th>Stock</th><th>Employee ID</th></tr>";
                 data.forEach(package => {
                     table += "<tr>" +
                         "<td>" + package.tour_package_id + "</td>" +
-                        "<td>" + package.name + "</td>" +
-                        "<td>" + package.description + "</td>" +
-                        "<td>" + package.status + "</td>" +
-                        "<td>" + package.price + "</td>" +
+                        "<td>" + package.tour_package_name + "</td>" +
+                        "<td>" + package.tour_package_description + "</td>" +
+                        "<td>" + package.tour_package_status + "</td>" +
+                        "<td>" + package.tour_package_price + "</td>" +
                         "<td>" + package.employee_id + "</td>" +
                         "</tr>";
                 });
@@ -1047,7 +1131,7 @@ function viewAllPackages() {
     printPackages("../control/view_all_package.php", "output");
 }
 function approveNewPackages() {
-    printPackages("../control/approve_new_package.php", "output");
+    printApprovePackages("../control/approve_new_package.php", "output");
 }
 
 

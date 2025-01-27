@@ -1,4 +1,9 @@
 <?php
+session_start();
+if (!isset($_SESSION["admin_email"])) {
+    header("Location: admin_login.php");
+    exit();
+}
 include '../model/mydb.php';
 
 header("Content-Type: application/json");
@@ -7,7 +12,7 @@ $db = new myDB();
 $conn = $db->openCon();
 
 if ($conn) {
-    $sql = "SELECT approve_tour_package_id, name, description, status, price, employee_id FROM approve_tour_package";
+    $sql = "SELECT * FROM approve_tour_package";
     $result = $conn->query($sql);
 
     if ($result->num_rows > 0) {

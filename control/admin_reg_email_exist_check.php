@@ -1,5 +1,10 @@
 <!-- admin_reg_email_exist_check.php -->
 <?php
+session_start();
+if (!isset($_SESSION["admin_email"])) {
+    header("Location: admin_login.php");
+    exit();
+}
 include '../model/mydb.php';
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
