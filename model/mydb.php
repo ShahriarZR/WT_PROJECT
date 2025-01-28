@@ -36,7 +36,7 @@ class myDB
         }
     }
 
-    function viewall($conn)
+    /* function viewall($conn)
     {
         $sql = "SELECT * FROM admin";
         $result = $conn->query($sql);
@@ -63,5 +63,5 @@ class myDB
         $sql = "UPDATE admin SET ;";
         $result = $conn->query($sql);
         return $result;
-    }
+    } */
 }
